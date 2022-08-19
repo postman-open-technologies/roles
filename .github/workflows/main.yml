@@ -1,0 +1,83 @@
+name: Roles  
+on: [push]
+jobs:
+  deploy_source:
+    name: Deploy API Using Lambda
+    strategy:
+      matrix:
+        node-version: [12.x]
+    runs-on: ubuntu-latest
+    steps:
+    
+      - uses: actions/checkout@v1
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: npm install and build
+        run: |
+          npm ci
+          npm run build --if-present
+        env:
+          CI: true
+
+      - name: /roles get lambda deploy zip
+        uses: postman-open-technologies/roles@main
+        with:
+            args: zip -qq -r m-s-roles-g.zip roles/get/index.js node_modules
+      - name: videos get lambda deploy
+        uses: appleboy/lambda-action@master
+        with:
+            aws_access_key_id: ${{secrets.AWS_ACCESS_KEY_ID}}
+            aws_secret_access_key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+            aws_region: us-west-1
+            function_name: m-s-roles-g
+            zip_file: m-s-roles-g.zip
+      - name: /roles post lambda deploy zip
+        uses: postman-open-technologies/roles@main
+        with:
+            args: zip -qq -r m-s-roles-po.zip roles/post/index.js node_modules
+      - name: videos get lambda deploy
+        uses: appleboy/lambda-action@master
+        with:
+            aws_access_key_id: ${{secrets.AWS_ACCESS_KEY_ID}}
+            aws_secret_access_key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+            aws_region: us-west-1
+            function_name: m-s-roles-po
+            zip_file: m-s-roles-po.zip
+      - name: /roles/{role_id} get lambda deploy zip
+        uses: postman-open-technologies/roles@main
+        with:
+            args: zip -qq -r m-s-roles-role-g.zip roles/role_id/get/index.js node_modules
+      - name: videos get lambda deploy
+        uses: appleboy/lambda-action@master
+        with:
+            aws_access_key_id: ${{secrets.AWS_ACCESS_KEY_ID}}
+            aws_secret_access_key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+            aws_region: us-west-1
+            function_name: m-s-roles-role-g
+            zip_file: m-s-roles-role-g.zip
+      - name: /roles/{role_id} put lambda deploy zip
+        uses: postman-open-technologies/roles@main
+        with:
+            args: zip -qq -r m-s-roles-role-pu.zip roles/role_id/put/index.js node_modules
+      - name: videos get lambda deploy
+        uses: appleboy/lambda-action@master
+        with:
+            aws_access_key_id: ${{secrets.AWS_ACCESS_KEY_ID}}
+            aws_secret_access_key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+            aws_region: us-west-1
+            function_name: m-s-roles-role-pu
+            zip_file: m-s-roles-role-pu.zip
+      - name: /roles/{role_id} delete lambda deploy zip
+        uses: postman-open-technologies/roles@main
+        with:
+            args: zip -qq -r m-s-roles-role-d.zip roles/role_id/delete/index.js node_modules
+      - name: videos get lambda deploy
+        uses: appleboy/lambda-action@master
+        with:
+            aws_access_key_id: ${{secrets.AWS_ACCESS_KEY_ID}}
+            aws_secret_access_key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+            aws_region: us-west-1
+            function_name: m-s-roles-role-d
+            zip_file: m-s-roles-role-d.zip          
